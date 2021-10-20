@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:portfolio/application.dart';
+import 'package:bugbusters/application.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<Result> launchURL(String url) async {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/application.dart';
+import 'package:bugbusters/application.dart';
 
 class SocialMediaButton extends InkWell {
   SocialMediaButton(

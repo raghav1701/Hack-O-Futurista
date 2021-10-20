@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:portfolio/application.dart';
+import 'package:bugbusters/application.dart';
 
 typedef _OnStartCallback = Future<void> Function();
 typedef _OnFinishCallback = Future<void> Function(

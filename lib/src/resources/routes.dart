@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:portfolio/application.dart';
+import 'package:bugbusters/application.dart';
 
 class Routes {
   Routes._();
