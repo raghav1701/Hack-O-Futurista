@@ -1,4 +1,5 @@
 import 'package:bugbusters/application.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
@@ -29,19 +30,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ),
     BottomBarItem(
       label: 'Vehicles',
-      icon: Icons.time_to_leave,
+      icon: FontAwesomeIcons.car,
       color: Colors.pink,
       widget: const MyVehicles(),
     ),
     BottomBarItem(
       label: 'History',
-      icon: Icons.content_paste_rounded,
+      icon: FontAwesomeIcons.history,
       color: Colors.orange,
       widget: const ParkingHistory(),
     ),
     BottomBarItem(
       label: 'Wallet',
-      icon: Icons.account_balance_wallet_rounded,
+      icon: FontAwesomeIcons.wallet,
       color: Colors.teal,
       widget: const PersonalWallet(),
     ),
@@ -52,6 +53,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppDetails.name),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.of(context).pushNamedAndRemoveUntil(Routes.welcome, (route) => false);
+            },
+            itemBuilder: (context) {
+              return [
+                const PopupMenuItem(child: Text('Log Out'), value: 'logout'),
+              ];
+            }
+          )
+        ],
       ),
       body: _fragments[currentPage].widget,
       bottomNavigationBar: SalomonBottomBar(
@@ -65,6 +79,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
         }).toList(),
         onTap: (index) => setState(() => currentPage = index),
+      ),
+      floatingActionButton: Visibility(
+        visible: currentPage < 2,
+        child: FloatingActionButton(
+          onPressed: () {
+
+          },
+          backgroundColor: _fragments[currentPage].color.withAlpha(132),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }

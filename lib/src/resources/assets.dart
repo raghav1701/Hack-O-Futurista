@@ -8,4 +8,8 @@ class Assets {
   static const welcomePageImage = '$_images/welcome.png';
   static const loginPageImage = '$_images/login.png';
   static const signupPageImage = '$_images/signup.png';
+
+  static const carGreen = '$_images/car_green.png';
+  static const carRed = '$_images/car_red.png';
+  static const carYellow = '$_images/car_yellow.png';
 }
