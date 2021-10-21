@@ -3,6 +3,7 @@ library widgets;
 export 'btn_social.dart';
 export 'dialog.dart';
 export 'interactive_text.dart';
+export 'progress_dialog.dart';
 export 'switch.dart';
 export 'tap_detector.dart';
 export 'tnc.dart';

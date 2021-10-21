@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesProvider {
-  static const _fieldName = 'field';
+  static const _accessLevel = 'accessLevel';
 
   static SharedPreferences? _prefs;
 
@@ -12,11 +12,11 @@ class SharedPreferencesProvider {
 
   SharedPreferencesProvider._();
 
-  Future<void> saveField(String value) async {
-    await _prefs?.setString(_fieldName, value);
+  Future<void> saveAccessLevel(int value) async {
+    await _prefs?.setInt(_accessLevel, value);
   }
 
-  String? get fieldValue => _prefs?.getString(_fieldName);
+  String? get accessLevel => _prefs?.getString(_accessLevel);
 }
 
 late SharedPreferencesProvider sharedPreferences;
