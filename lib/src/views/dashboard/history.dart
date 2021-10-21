@@ -2,8 +2,8 @@ import 'package:bugbusters/application.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+class History extends StatelessWidget {
+  const History({Key? key}) : super(key: key);
 
   Future<String> getDat() async {
     return await FirebaseAuthService.getUserAccessLevel().then((value) => value.toString());
