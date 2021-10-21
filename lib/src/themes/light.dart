@@ -44,6 +44,10 @@ ThemeData lightTheme = ThemeData.light().copyWith(
     ),
   ),
 
+  colorScheme: const ColorScheme.light(
+    primary: Color(0xFF0B4AAA),
+  ),
+
   dividerTheme: DividerThemeData(
     color: Colors.grey.shade600,
   ),

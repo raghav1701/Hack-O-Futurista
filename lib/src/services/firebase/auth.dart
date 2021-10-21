@@ -8,7 +8,7 @@ import 'package:bugbusters/application.dart';
 
 typedef _OnStartCallback = Future<void> Function();
 typedef _OnFinishCallback = Future<void> Function(
-    User? user, Map<String, Object>? additionalData);
+    User? user, Map<String, dynamic>? claims);
 typedef _OnErrorCallback = Future<void> Function(
     ResultCode code, String? message);
 
@@ -65,7 +65,7 @@ class FirebaseAuthService {
             .timeout(const Duration(seconds: 20));
       }
       if (user.user != null) {
-        await onFinish(user.user, null);
+        await onFinish(user.user, await getCustomClaims());
       } else {
         throw 'Unknown Error';
       }
@@ -85,6 +85,9 @@ class FirebaseAuthService {
   Future<void> googleOAuth() async {
     await onStart();
     try {
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.disconnect();
+      }
       var googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
         var googleAuth = await googleUser.authentication;
@@ -94,7 +97,7 @@ class FirebaseAuthService {
         );
         var user = await _firebaseAuth.signInWithCredential(credential);
         if (user.user != null) {
-          await onFinish(user.user, null);
+          await onFinish(user.user, await getCustomClaims());
         } else {
           throw 'Unknown Error';
         }
@@ -116,6 +119,8 @@ class FirebaseAuthService {
 
   static Future<Map<String, dynamic>?> getCustomClaims() async {
     var token = await _firebaseAuth.currentUser?.getIdTokenResult();
+    // ignore: avoid_print
+    print("claims = ${token?.claims}");
     return token?.claims;
   }
 

@@ -8,7 +8,7 @@ class TapDetector extends InkWell {
     GestureTapCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onHighlightChanged,
-    Color textColor = const Color(0xFF10B73F),
+    Color textColor = const Color(0xFF0B4AAA),
     FontWeight fontWeight = FontWeight.bold,
   }) : super(
           key: key,

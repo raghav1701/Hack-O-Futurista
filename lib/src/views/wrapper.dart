@@ -3,8 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:bugbusters/application.dart';
 
-// ignore: use_key_in_widget_constructors
 class Wrapper extends StatefulWidget {
+  const Wrapper({Key? key}) : super(key: key);
+
   @override
   _WrapperState createState() => _WrapperState();
 }

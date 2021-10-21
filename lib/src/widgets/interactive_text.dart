@@ -16,7 +16,7 @@ class InteractiveText extends InkWell {
     String? semanticsLabel,
     TextWidthBasis? textWidthBasis,
     TextHeightBehavior? textHeightBehavior,
-    Color? textColor = const Color(0xFF10B73F),
+    Color? textColor = const Color(0xFF0B4AAA),
     FontWeight? fontWeight = FontWeight.bold,
     GestureTapCallback? onTap,
     GestureTapCallback? onLongPress,
