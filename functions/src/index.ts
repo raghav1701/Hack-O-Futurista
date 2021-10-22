@@ -6,11 +6,11 @@ admin.initializeApp();
 /*
   Constants
 */
-const storeCollections = {
+const collections = {
   users: 'users',
+  managers: 'managers',
   transactions: 'transactions',
   vehicles: 'vehicles',
-  parking: 'parkings',
 };
 
 const userRoles = {
@@ -43,12 +43,17 @@ export const userSignup = functions.auth.user().onCreate(async (user) => {
       : userRoles.driver;
 
   if (level == userRoles.driver) {
-    await admin.firestore().collection(storeCollections.users).doc(user.uid).set({
+    await admin.firestore().collection(collections.users).doc(user.uid).set({
       balance: 0,
+      lastTransaction: admin.firestore.Timestamp.now(),
     });
   } else {
-    await admin.firestore().collection(storeCollections.parking).doc(user.uid).set({
+    await admin.firestore().collection(collections.managers).doc(user.uid).set({
       balance: 0,
+      initialHourCharges: 30,
+      perHourCharges: 30,
+      autoSlotBooking: false,
+      lastTransaction: admin.firestore.Timestamp.now(),
       map: [
         "0110330110",
         "4555555553",
@@ -71,42 +76,110 @@ export const userSignup = functions.auth.user().onCreate(async (user) => {
   });
 });
 
-// export const enterParking = functions.https.onCall(async (data, context) => {
-//   if (!context.auth) {
-//     throw new functions.https.HttpsError(
-//       'unauthenticated',
-//       'only authenticated can proceed ahead',
-//     );
-//   }
+/*
+  Vehicle Enters Parking
+*/
+export const enterParking = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'only authenticated users can proceed ahead',
+    );
+  }
 
-//   const userId = data.uid as string;
-//   const parkingId = context.auth.uid as string;
-//   const slot = data.slot;
-//   const
+  const userId: string = data.uid;
+  const parkId: string = data.pid;
+  const vehicleId: string = data.vehicleId;
+  const slotRC: Array<number> | undefined = data.slot;
 
-//   const tid = await admin.firestore().collection(storeCollections.parking).add({
-//     uid: userId,
-//     timeEntry: admin.firestore.Timestamp.now(),
-//     timeExit: admin.firestore.Timestamp.now(),
-//     slot:
-//   });
-// });
+  const pDoc = await admin.firestore().collection(collections.managers).doc(parkId).get();
+  const pDat = pDoc.data()!;
+  const pChg: number = pDat['initialHourCharges'];
+  const pPhg: number = pDat['perHourCharges'];
+  const pMap: Array<string> = pDat['map'];
 
-// export const exitParking = functions.https.onCall(async (data, context) => {
-//   if (!context.auth) {
-//     throw new functions.https.HttpsError(
-//       'unauthenticated',
-//       'only authenticated can proceed ahead',
-//     );
-//   }
+  if (slotRC != undefined) {
+    await admin.firestore().collection(collections.managers).doc(parkId).update({
+      map: updateMap(2, slotRC[0], slotRC[1], pMap),
+    })
+  }
 
-//   const tid = data.tid;
+  const tid = await admin.firestore().collection(collections.transactions).add({
+    uid: userId,
+    parking: parkId,
+    vehicle: vehicleId,
+    slot: slotRC ?? [-1, -1],
+    timeEntry: admin.firestore.Timestamp.now(),
+    timeExit: admin.firestore.Timestamp.now(),
+    amount: pChg,
+    perHourCharge: pPhg,
+    status: slotRC == undefined ? 'booking' : 'parked',
+  });
 
-//   await admin.firestore().collection(storeCollections.parking).add({
-//     uid: context.auth.uid,
-//     date: admin.firestore.Timestamp.now(),
-//     amount:
-//   });
+  return tid.id;
+});
 
-//   return
-// });
+/*
+  Vehicle Exits Parking
+*/
+export const exitParking = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'only authenticated users can proceed ahead',
+    );
+  }
+
+  const userId: string = data.uid;
+  const parkId: string = data.pid;
+  const vehicleId: string = data.vehicleId;
+
+  const pDoc = await admin.firestore().collection(collections.managers).doc(parkId).get();
+  const udoc = await admin.firestore().collection(collections.users).doc(userId).get();
+  const tdoc = await admin.firestore().collection(collections.transactions)
+    .where("vehicleId", "==", vehicleId).where("status", "==", "parked").get().then(value => {
+      return value.docs[0];
+    });
+
+  const pDat = pDoc.data()!;
+  const pMap: Array<string> = pDat['map'];
+  const slotRC: Array<number> = tdoc.data()!['slot']
+
+  const entry: admin.firestore.Timestamp = tdoc.data()!['timeEntry'];
+  const exit = admin.firestore.Timestamp.now();
+  const charges = pDat['initialHourCharges'] + Math.ceil((exit.seconds - entry.seconds) / 3600) * pDat['perHourCharges'];
+
+  await admin.firestore().collection(collections.users).doc(userId).update({
+    balance: udoc.data()!['balance'] - charges,
+    lastTransaction: exit,
+  });
+
+  await admin.firestore().collection(collections.managers).doc(parkId).update({
+    balance: pDat['balance'] + charges,
+    lastTransaction: exit,
+    map: updateMap(1, slotRC[0], slotRC[1], pMap),
+  })
+
+  await admin.firestore().collection(collections.transactions).doc(tdoc.id).update({
+    timeExit: exit,
+    amount: charges,
+    status: 'completed',
+  });
+
+  return "Transaction Complete";
+});
+
+function updateMap(value: number, row: number, col: number, map: string[]): string[] {
+  let pmap: Array<string> = [];
+  for (let i=0 ; i<map.length ; ++i) {
+    if (row == i) {
+      pmap.push(map[i]);
+    } else {
+      const x = map[i].split("");
+      x[col] = value.toString();
+      const y = x.join("");
+      pmap.push(y);
+    }
+  }
+  return pmap;
+}
