@@ -215,7 +215,7 @@ export const exitParking = functions.https.onCall(async (data, context) => {
 function updateMap(value: number, row: number, col: number, map: string[]): string[] {
   let pmap: Array<string> = [];
   for (let i=0 ; i<map.length ; ++i) {
-    if (row == i) {
+    if (row != i) {
       pmap.push(map[i]);
     } else {
       const x = map[i].split("");

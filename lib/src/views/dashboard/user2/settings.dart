@@ -1,7 +1,9 @@
 import 'package:bugbusters/application.dart';
 import 'package:bugbusters/src/services/firebase/auth.dart';
+import 'package:bugbusters/src/services/services.dart';
 import 'package:bugbusters/src/views/dashboard/components/divider.dart';
 import 'package:bugbusters/src/views/dashboard/components/load.dart';
+import 'package:bugbusters/src/views/dashboard/controller/slot.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -59,14 +61,8 @@ class MSetting extends StatelessWidget {
                 ListTile(
                   title: const Text('View Parking Map'),
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                      return const BookSlot(
-                        tid: '',
-                        pid: '',
-                        slot: [-1, -1],
-                        viewOnly: true,
-                      );
-                    }));
+                    navigateBookSlot(context, '', FirebaseAuthService.user!.uid,
+                        [-1, -1], true);
                   },
                 ),
                 const Separator(),

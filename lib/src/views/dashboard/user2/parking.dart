@@ -54,7 +54,7 @@ class _MParkingState extends State<MParking> {
               }
             },
             icon: const Icon(FontAwesomeIcons.plus),
-            label: const Text('Park Vehicle'),
+            label: const Text('Entry Scanner'),
           ),
           OutlinedButton.icon(
             onPressed: () async {
@@ -66,7 +66,7 @@ class _MParkingState extends State<MParking> {
               }
             },
             icon: const Icon(FontAwesomeIcons.minus),
-            label: const Text('Exit Vehicle  '),
+            label: const Text('Exit Scanner    '),
           ),
         ],
       ),

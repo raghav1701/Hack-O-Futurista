@@ -66,6 +66,7 @@ class _MDashboardScreenState extends State<MDashboardScreen> {
           icon: FontAwesomeIcons.wallet,
           color: Colors.orange,
           widget: Wallet(
+            isParkingStaff: true,
             balanceStream: FirebaseFirestore.instance
                 .collection(Collections.managers)
                 .doc(FirebaseAuthService.user!.uid),

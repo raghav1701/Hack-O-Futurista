@@ -4,12 +4,12 @@ import 'package:bugbusters/application.dart';
 import 'package:flutter/material.dart';
 
 class _ItemType {
-  static const int border = 0;
+  // static const int border = 0;
   static const int vacant = 1;
   static const int occupied = 2;
   static const int elevator = 3;
   static const int stairs = 4;
-  static const int empty = 5;
+  // static const int empty = 5;
   static const int entry = 6;
   static const int exit = 7;
   static const int selected = 8;
@@ -17,13 +17,14 @@ class _ItemType {
 
 class BookSlot extends StatefulWidget {
   final List<dynamic> map;
-  final String tid;
-  final String pid;
   final bool viewOnly;
-  final List<int> slot;
+  final List<int>? initialSlot;
+  final void Function(BuildContext, ProgressDialog, List<int> slot)? onSubmit;
 
   const BookSlot({
     Key? key,
+    this.initialSlot,
+    this.onSubmit,
     this.map = const [
       "0110330110",
       "4555555553",
@@ -39,9 +40,6 @@ class BookSlot extends StatefulWidget {
       "5551151551",
       "0660000770",
     ],
-    required this.tid,
-    required this.pid,
-    required this.slot,
     this.viewOnly = false,
   }) : super(key: key);
 
@@ -64,19 +62,7 @@ class _BookSlotState extends State<BookSlot> {
     int row = selectedIndex ~/ pMap[0].length;
     int col = selectedIndex % pMap[0].length;
 
-    showConfirmDialog(
-      context: context,
-      title: 'Book Slot',
-      content: 'Selected Slot is $slotNumber',
-      onAccept: () async {
-        Navigator.of(context).pop();
-        await progressDialog.show();
-        await FirebaseFunctionService()
-            .bookSlot(tid: widget.tid, parkId: widget.pid, slot: [row, col]);
-        await progressDialog.hide();
-        Navigator.of(context).pop();
-      },
-    );
+    widget.onSubmit!(context, progressDialog, [row, col]);
   }
 
   void handleAutoSelect() {
@@ -89,12 +75,14 @@ class _BookSlotState extends State<BookSlot> {
   void initState() {
     super.initState();
     slotNumber = widget.viewOnly
-        ? (widget.slot[1] != -1
-            ? '${alphabets[widget.slot[1]]}${widget.slot[0]}'
+        ? (widget.initialSlot != null && widget.initialSlot![1] != -1
+            ? '${alphabets[widget.initialSlot![1]]}${widget.initialSlot![0]}'
             : 'NA')
         : 'None';
     pMap = widget.map.cast<String>();
-    selectedIndex = widget.viewOnly ? widget.slot[0] * pMap[0].length + widget.slot[1] : -1;
+    selectedIndex = widget.viewOnly && widget.initialSlot != null
+        ? widget.initialSlot![0] * pMap[0].length + widget.initialSlot![1]
+        : -1;
     progressDialog = ProgressDialog(
       context,
       isDismissible: false,
@@ -119,7 +107,7 @@ class _BookSlotState extends State<BookSlot> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Choose Slot'),
+        title: const Text('Parking Map'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -273,14 +261,16 @@ class _BookSlotState extends State<BookSlot> {
         ),
       ),
       child: InkWell(
-        onTap: widget.viewOnly ? null : () {
-          if (value == 1) {
-            setState(() {
-              selectedIndex = row * pMap[0].length + col;
-              slotNumber = '${alphabets[col]}$row';
-            });
-          }
-        },
+        onTap: widget.viewOnly
+            ? null
+            : () {
+                if (value == 1) {
+                  setState(() {
+                    selectedIndex = row * pMap[0].length + col;
+                    slotNumber = '${alphabets[col]}$row';
+                  });
+                }
+              },
         child: Center(
           child: Transform.rotate(
             angle: transformation,

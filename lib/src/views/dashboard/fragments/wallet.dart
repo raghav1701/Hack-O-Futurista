@@ -88,6 +88,7 @@ class Wallet extends StatelessWidget {
                               title: isParkingStaff
                                   ? Text('${data[index]['parkName']}')
                                   : Text('${data[index]['vehicle']}'),
+                              subtitle: Text(convertTimestampToReadable(data[index]['timeExit'])),
                               trailing: Text(
                                 (isParkingStaff ? '+' : '-') +
                                     '${data[index]['amount']}',

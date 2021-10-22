@@ -1,4 +1,5 @@
 import 'package:bugbusters/application.dart';
+import 'package:bugbusters/src/views/dashboard/controller/slot.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_barcodes/barcodes.dart';
@@ -66,26 +67,8 @@ class ParkItemCard extends StatelessWidget {
                   visible: status < 2,
                   child: ElevatedButton(
                     onPressed: () async {
-                      try {
-                        var doc = await FirebaseFirestore.instance
-                            .collection(Collections.managers)
-                            .doc(pid)
-                            .get();
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (_) {
-                          return BookSlot(
-                            map: doc.data()!['map'],
-                            viewOnly: status == 1,
-                            tid: tid,
-                            pid: pid,
-                            slot: slot.cast<int>(),
-                          );
-                        }));
-                      } catch (e) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(SnackBar(content: Text('$e')));
-                      }
+                      navigateBookSlot(
+                          context, tid, pid, slot.cast<int>(), status == 1);
                     },
                     child: Text(status == 0 ? 'Book Slot' : 'View Map'),
                   ),
@@ -101,7 +84,8 @@ class ParkItemCard extends StatelessWidget {
             Visibility(
               visible: status == 1,
               child: Text(
-                'Slot ' + (slot[1] != -1 ? '${alphabets[slot[1]]}${slot[0]}' : ''),
+                'Slot ' +
+                    (slot[1] != -1 ? '${alphabets[slot[1]]}${slot[0]}' : ''),
               ),
             ),
             Row(
@@ -117,26 +101,27 @@ class ParkItemCard extends StatelessWidget {
                     child: const Text('Get Code'),
                     onPressed: () {
                       showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        useSafeArea: true,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Vehicle Code'),
-                            content: SizedBox(
-                              height: 100,
-                              child: SfBarcodeGenerator(value: vid, showValue: true),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Dismiss'),
+                          context: context,
+                          barrierDismissible: false,
+                          useSafeArea: true,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Vehicle Code'),
+                              content: SizedBox(
+                                height: 100,
+                                child: SfBarcodeGenerator(
+                                    value: vid, showValue: true),
                               ),
-                            ],
-                          );
-                        });
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Dismiss'),
+                                ),
+                              ],
+                            );
+                          });
                     },
                   ),
                 ),
