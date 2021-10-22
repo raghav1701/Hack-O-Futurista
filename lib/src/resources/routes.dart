@@ -8,10 +8,11 @@ class Routes {
   static const welcome = '/welcome';
   static const signin = '/signin';
   static const signup = '/signup';
+  static const dashboard = '/dashboard';
+  static const vehicleRegister = '/vehicleRegister';
   static const bookslot = '/bookslot';
   static const tnc = '/terms';
 
-  static const dashboard = '/dashboard';
 
   static Map<String, WidgetBuilder> routes = {
     wrapper: (_) => const Wrapper(),
@@ -21,6 +22,7 @@ class Routes {
     signup: (_) => const SignupScreen(),
 
     dashboard: (_) => const DashboardScreen(),
+    vehicleRegister: (_) => VehicleRegistraionForm(),
 
     bookslot: (_) => const BookSlot(),
 

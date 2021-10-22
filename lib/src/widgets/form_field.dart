@@ -8,11 +8,12 @@ class AuthTextFormField extends Padding {
     required FormFieldSetter<String>? onSaved,
     required FormFieldValidator<String>? validator,
     TextInputType? textInputType,
+    double? horizontalPadding,
     bool showText = true,
   }) : super(
           key: key,
-          padding: const EdgeInsets.symmetric(
-            horizontal: authBtnPadding,
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding ?? authBtnPadding,
             vertical: 8.0,
           ),
           child: TextFormField(

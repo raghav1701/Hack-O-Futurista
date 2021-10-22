@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 void showConfirmDialog({
   required BuildContext context,
-  required String title,
-  required String content,
+  String? content,
+  String? title,
   Widget? child,
   String? declineText,
   String? acceptText,
@@ -15,10 +15,12 @@ void showConfirmDialog({
 }) {
   showDialog(
     context: context,
+    barrierDismissible: false,
+    useSafeArea: true,
     builder: (context) {
       return AlertDialog(
-        title: Text(title, style: titleTextStyle),
-        content: child ?? Text(content, style: contentTextStyle),
+        title: title != null ? Text(title, style: titleTextStyle) : null,
+        content: child ?? (content != null ? Text(content, style: contentTextStyle) : null),
         actions: [
           TextButton(
             onPressed: onDecline ?? () => Navigator.of(context).pop(),

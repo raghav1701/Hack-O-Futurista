@@ -12,3 +12,5 @@ export 'dashboard/dashboard.dart';
 export 'dashboard/parking.dart';
 export 'dashboard/vehicles.dart';
 export 'dashboard/history.dart';
+
+export 'dashboard/fragments/vehicle_regiser.dart';

@@ -2,7 +2,6 @@ import 'package:bugbusters/application.dart';
 import 'package:flutter/material.dart';
 
 import 'components/btn.dart';
-import 'components/form_field.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);

@@ -38,6 +38,16 @@ String? validatePassword(String? password) {
   return null;
 }
 
+String? validateVehicleID(String? text) {
+  if (text == null || text.isEmpty) {
+    return 'This is a required field';
+  }
+  if (text.length < 8 || text.length > 12 || !text[0].contains(RegExp(r'[A-Z]')) || !text[1].contains(RegExp(r'[A-Z]'))) {
+    return 'Invalid Number';
+  }
+  return null;
+}
+
 String? requiredFormField(String? text) {
   if (text == null || text.isEmpty) {
     return 'This is a required field';

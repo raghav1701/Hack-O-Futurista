@@ -23,12 +23,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final _fragments = [
     BottomBarItem(
-      label: 'Parking',
-      icon: FontAwesomeIcons.parking,
-      color: Colors.purple,
-      widget: const MyParkings(),
-    ),
-    BottomBarItem(
       label: 'Vehicles',
       icon: FontAwesomeIcons.car,
       color: Colors.pink,
@@ -49,22 +43,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _fragments.insert(
+        0,
+        BottomBarItem(
+          label: 'Parking',
+          icon: FontAwesomeIcons.parking,
+          color: Colors.purple,
+          widget: MyParkings(
+            trigger: parkCarTrigger,
+          ),
+        ));
+  }
+
+  void parkCarTrigger() {
+    setState(() {
+      currentPage = 1;
+    });
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        useSafeArea: true,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Select Vehicle'),
+            content: const Text('Select a vehicle from the list of vehicles you\'ve added, if not then add a vehicle first then scan the bar code at some parking.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Dismiss'),
+              ),
+            ],
+          );
+        });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppDetails.name),
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.of(context).pushNamedAndRemoveUntil(Routes.welcome, (route) => false);
-            },
-            itemBuilder: (context) {
-              return [
-                const PopupMenuItem(child: Text('Log Out'), value: 'logout'),
-              ];
-            }
-          )
+          PopupMenuButton<String>(onSelected: (value) async {
+            await FirebaseAuth.instance.signOut();
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil(Routes.welcome, (route) => false);
+          }, itemBuilder: (context) {
+            return [
+              const PopupMenuItem(child: Text('Log Out'), value: 'logout'),
+            ];
+          })
         ],
       ),
       body: _fragments[currentPage].widget,
@@ -84,7 +115,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         visible: currentPage < 2,
         child: FloatingActionButton(
           onPressed: () {
-
+            if (currentPage == 0) {
+              parkCarTrigger();
+            }
+            if (currentPage == 1) {
+              Navigator.of(context).pushNamed(Routes.vehicleRegister);
+            }
           },
           backgroundColor: _fragments[currentPage].color.withAlpha(132),
           child: const Icon(Icons.add, color: Colors.white),

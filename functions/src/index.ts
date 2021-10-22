@@ -87,12 +87,17 @@ export const enterParking = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const userId: string = data.uid;
   const parkId: string = data.pid;
   const vehicleId: string = data.vehicleId;
   const slotRC: Array<number> | undefined = data.slot;
 
+  const userId = await admin.firestore().collection(collections.vehicles)
+    .where("vid", "==", vehicleId).get().then(value => {
+      return value.docs[0].data()!['uid'] as string;
+    });
+
   const pDoc = await admin.firestore().collection(collections.managers).doc(parkId).get();
+
   const pDat = pDoc.data()!;
   const pChg: number = pDat['initialHourCharges'];
   const pPhg: number = pDat['perHourCharges'];
@@ -130,9 +135,13 @@ export const exitParking = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const userId: string = data.uid;
   const parkId: string = data.pid;
   const vehicleId: string = data.vehicleId;
+
+  const userId = await admin.firestore().collection(collections.vehicles)
+    .where("vid", "==", vehicleId).get().then(value => {
+      return value.docs[0].data()!['uid'] as string;
+    });
 
   const pDoc = await admin.firestore().collection(collections.managers).doc(parkId).get();
   const udoc = await admin.firestore().collection(collections.users).doc(userId).get();
