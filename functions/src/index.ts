@@ -88,6 +88,7 @@ export const enterParking = functions.https.onCall(async (data, context) => {
   }
 
   const parkId: string = data.pid;
+  const parkName: string = data.pname;
   const vehicleId: string = data.vehicleId;
   const slotRC: Array<number> | undefined = data.slot;
 
@@ -112,17 +113,50 @@ export const enterParking = functions.https.onCall(async (data, context) => {
   const tid = await admin.firestore().collection(collections.transactions).add({
     uid: userId,
     parking: parkId,
+    parkName: parkName,
     vehicle: vehicleId,
     slot: slotRC ?? [-1, -1],
     timeEntry: admin.firestore.Timestamp.now(),
     timeExit: admin.firestore.Timestamp.now(),
     amount: pChg,
     perHourCharge: pPhg,
-    status: slotRC == undefined ? 'booking' : 'parked',
+    status: slotRC == undefined ? 0 : 1,
   });
 
   return tid.id;
 });
+
+/*
+  Book Slot Manually
+*/
+export const bookSlot = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'only authenticated users can proceed ahead',
+    );
+  }
+
+  const tid: string = data.tid;
+  const parkId: string = data.pid;
+  const slotRC: Array<number> = data.slot;
+
+  const pDoc = await admin.firestore().collection(collections.managers).doc(parkId).get();
+  const pDat = pDoc.data()!;
+  const pMap: Array<string> = pDat['map'];
+
+  await admin.firestore().collection(collections.managers).doc(parkId).update({
+    map: updateMap(2, slotRC[0], slotRC[1], pMap),
+  })
+
+  await admin.firestore().collection(collections.transactions).doc(tid).update({
+    slot: slotRC,
+    status: 1,
+  });
+
+  return "Booking Complete";
+});
+
 
 /*
   Vehicle Exits Parking
@@ -146,7 +180,7 @@ export const exitParking = functions.https.onCall(async (data, context) => {
   const pDoc = await admin.firestore().collection(collections.managers).doc(parkId).get();
   const udoc = await admin.firestore().collection(collections.users).doc(userId).get();
   const tdoc = await admin.firestore().collection(collections.transactions)
-    .where("vehicleId", "==", vehicleId).where("status", "==", "parked").get().then(value => {
+    .where("vehicle", "==", vehicleId).where("status", "==", 1).get().then(value => {
       return value.docs[0];
     });
 
@@ -172,7 +206,7 @@ export const exitParking = functions.https.onCall(async (data, context) => {
   await admin.firestore().collection(collections.transactions).doc(tdoc.id).update({
     timeExit: exit,
     amount: charges,
-    status: 'completed',
+    status: 2,
   });
 
   return "Transaction Complete";

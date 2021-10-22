@@ -15,7 +15,7 @@ class MyVehicles extends StatelessWidget {
           .where('uid', isEqualTo: uid)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(
             child: OutlinedButton.icon(
               onPressed: () {

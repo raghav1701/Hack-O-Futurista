@@ -17,8 +17,10 @@ class _WrapperState extends State<Wrapper> {
     Firebase.initializeApp().then((value) {
       if (FirebaseAuth.instance.currentUser == null) {
         Navigator.of(context).pushReplacementNamed(Routes.welcome);
-      } else {
+      } else if (sharedPreferences.accessLevel == 1) {
         Navigator.of(context).pushReplacementNamed(Routes.dashboard);
+      } else {
+        Navigator.of(context).pushReplacementNamed(Routes.mdashboard);
       }
     });
   }

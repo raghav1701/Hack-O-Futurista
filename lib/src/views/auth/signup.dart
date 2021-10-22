@@ -45,9 +45,15 @@ class _SignupScreenState extends State<SignupScreen> {
       },
       onFinish: (user, claims) async {
         await progressDialog.hide();
-        await sharedPreferences.saveAccessLevel(claims?['accessLevel'] as int);
-        Navigator.of(context)
+        int level = claims?['accessLevel'] as int;
+        await sharedPreferences.saveAccessLevel(level);
+        if (level == 1) {
+          Navigator.of(context)
             .pushNamedAndRemoveUntil(Routes.dashboard, (route) => false);
+        } else {
+          Navigator.of(context)
+            .pushNamedAndRemoveUntil(Routes.mdashboard, (route) => false);
+        }
       },
       onError: (code, message) async {
         if (mounted) {

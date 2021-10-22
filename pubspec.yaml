@@ -48,6 +48,7 @@ dependencies:
   shared_preferences: ^2.0.6
   sqflite: ^2.0.0+4
   syncfusion_flutter_barcodes: ^19.3.46
+  flutter_barcode_scanner: ^2.0.0
   url_launcher: ^6.0.12
 
 dev_dependencies:

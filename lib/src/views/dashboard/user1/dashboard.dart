@@ -1,15 +1,16 @@
 import 'package:bugbusters/application.dart';
+import 'package:bugbusters/src/services/firebase/auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
-import 'history.dart';
-import 'parking.dart';
+import '../fragments/parking.dart';
 import 'vehicles.dart';
-import 'wallet.dart';
+import '../fragments/wallet.dart';
 
-import 'models/bottom_bar_item.dart';
+import '../models/bottom_bar_item.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -28,18 +29,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: Colors.pink,
       widget: const MyVehicles(),
     ),
-    BottomBarItem(
-      label: 'History',
-      icon: FontAwesomeIcons.history,
-      color: Colors.orange,
-      widget: const ParkingHistory(),
-    ),
-    BottomBarItem(
-      label: 'Wallet',
-      icon: FontAwesomeIcons.wallet,
-      color: Colors.teal,
-      widget: const PersonalWallet(),
-    ),
   ];
 
   @override
@@ -52,7 +41,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
           icon: FontAwesomeIcons.parking,
           color: Colors.purple,
           widget: MyParkings(
+            btnText: 'Park Vehicle',
+            stream: FirebaseFirestore.instance
+                .collection(Collections.transactions)
+                .where('uid', isEqualTo: FirebaseAuthService.user!.uid)
+                .where(
+                  'status',
+                  isLessThan: 2,
+                )
+                .orderBy('status'),
             trigger: parkCarTrigger,
+          ),
+        ));
+    _fragments.insert(
+        2,
+        BottomBarItem(
+          label: 'History',
+          icon: FontAwesomeIcons.history,
+          color: Colors.orange,
+          widget: MyParkings(
+            btnText: 'Complete Parkings',
+            stream: FirebaseFirestore.instance
+                .collection(Collections.transactions)
+                .where('uid', isEqualTo: FirebaseAuthService.user!.uid)
+                .where(
+                  'status',
+                  isEqualTo: 2,
+                )
+                .orderBy('timeExit'),
+            trigger: () {
+              setState(() {
+                currentPage = 1;
+              });
+            },
+          ),
+        ));
+
+    _fragments.insert(
+        3,
+        BottomBarItem(
+          label: 'Wallet',
+          icon: FontAwesomeIcons.wallet,
+          color: Colors.teal,
+          widget: Wallet(
+            balanceStream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(FirebaseAuthService.user?.uid),
+            transactionStream: FirebaseFirestore.instance
+                              .collection(Collections.transactions)
+                              .where('uid', isEqualTo: FirebaseAuthService.user!.uid)
+                              .where('status', isEqualTo: 2)
+                              .orderBy('timeExit', descending: true)
           ),
         ));
   }
@@ -68,7 +107,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         builder: (context) {
           return AlertDialog(
             title: const Text('Select Vehicle'),
-            content: const Text('Select a vehicle from the list of vehicles you\'ve added, if not then add a vehicle first then scan the bar code at some parking.'),
+            content: const Text(
+                'Select a vehicle from the list of vehicles you\'ve added, if not then add a vehicle first then scan the bar code at some parking.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -117,6 +157,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onPressed: () {
             if (currentPage == 0) {
               parkCarTrigger();
+              return;
             }
             if (currentPage == 1) {
               Navigator.of(context).pushNamed(Routes.vehicleRegister);

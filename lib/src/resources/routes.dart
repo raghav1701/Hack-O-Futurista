@@ -9,6 +9,7 @@ class Routes {
   static const signin = '/signin';
   static const signup = '/signup';
   static const dashboard = '/dashboard';
+  static const mdashboard = '/mdashboard';
   static const vehicleRegister = '/vehicleRegister';
   static const bookslot = '/bookslot';
   static const tnc = '/terms';
@@ -22,9 +23,8 @@ class Routes {
     signup: (_) => const SignupScreen(),
 
     dashboard: (_) => const DashboardScreen(),
-    vehicleRegister: (_) => VehicleRegistraionForm(),
-
-    bookslot: (_) => const BookSlot(),
+    mdashboard: (_) => const MDashboardScreen(),
+    vehicleRegister: (_) => const VehicleRegistraionForm(),
 
     tnc: (_) => TnCScreen(),
   };
