@@ -4,22 +4,27 @@ import 'package:bugbusters/application.dart';
 import 'package:flutter/material.dart';
 
 class _ItemType {
-  static const int border = 0;
+  // static const int border = 0;
   static const int vacant = 1;
   static const int occupied = 2;
   static const int elevator = 3;
   static const int stairs = 4;
-  static const int empty = 5;
+  // static const int empty = 5;
   static const int entry = 6;
   static const int exit = 7;
   static const int selected = 8;
 }
 
 class BookSlot extends StatefulWidget {
-  final List<String> map;
+  final List<dynamic> map;
+  final bool viewOnly;
+  final List<int>? initialSlot;
+  final void Function(BuildContext, ProgressDialog, List<int> slot)? onSubmit;
 
   const BookSlot({
     Key? key,
+    this.initialSlot,
+    this.onSubmit,
     this.map = const [
       "0110330110",
       "4555555553",
@@ -35,6 +40,7 @@ class BookSlot extends StatefulWidget {
       "5551151551",
       "0660000770",
     ],
+    this.viewOnly = false,
   }) : super(key: key);
 
   @override
@@ -42,22 +48,66 @@ class BookSlot extends StatefulWidget {
 }
 
 class _BookSlotState extends State<BookSlot> {
+  late final ProgressDialog progressDialog;
   String slotNumber = 'None';
   int selectedIndex = -1;
 
   void handleForward() {
-    //TODO:
+    if (selectedIndex == -1) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Select a Slot First')));
+      return;
+    }
+    int row = selectedIndex ~/ pMap[0].length;
+    int col = selectedIndex % pMap[0].length;
+
+    widget.onSubmit!(context, progressDialog, [row, col]);
   }
 
   void handleAutoSelect() {
     //TODO:
   }
 
+  late List<String> pMap = [];
+
+  @override
+  void initState() {
+    super.initState();
+    slotNumber = widget.viewOnly
+        ? (widget.initialSlot != null && widget.initialSlot![1] != -1
+            ? '${alphabets[widget.initialSlot![1]]}${widget.initialSlot![0]}'
+            : 'NA')
+        : 'None';
+    pMap = widget.map.cast<String>();
+    selectedIndex = widget.viewOnly && widget.initialSlot != null
+        ? widget.initialSlot![0] * pMap[0].length + widget.initialSlot![1]
+        : -1;
+    progressDialog = ProgressDialog(
+      context,
+      isDismissible: false,
+      type: ProgressDialogType.normal,
+      customBody: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16.0,
+          vertical: 24.0,
+        ),
+        child: Row(
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(width: 16.0),
+            Text('Booking Slot...'),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Choose Slot'),
+        title: const Text('Parking Map'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,13 +138,13 @@ class _BookSlotState extends State<BookSlot> {
                   child: GridView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: widget.map[0].length,
+                      crossAxisCount: pMap[0].length,
                     ),
-                    itemCount: widget.map[0].length * widget.map.length,
+                    itemCount: pMap[0].length * pMap.length,
                     itemBuilder: (context, index) {
-                      var row = index ~/ widget.map[0].length;
-                      var col = index % widget.map[0].length;
-                      var val = int.parse(widget.map[row][col]);
+                      var row = index ~/ pMap[0].length;
+                      var col = index % pMap[0].length;
+                      var val = int.parse(pMap[row][col]);
                       if (selectedIndex == index) {
                         return GridTile(
                           key: Key('$index'),
@@ -124,36 +174,45 @@ class _BookSlotState extends State<BookSlot> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  Expanded(child: buildLegendImage(context, Assets.carGreen, 'Available')),
-                  Expanded(child: buildLegendImage(context, Assets.carRed, 'Occupied')),
-                  Expanded(child: buildLegendImage(context, Assets.carYellow, 'Selected')),
+                  Expanded(
+                      child: buildLegendImage(
+                          context, Assets.carGreen, 'Available')),
+                  Expanded(
+                      child:
+                          buildLegendImage(context, Assets.carRed, 'Occupied')),
+                  Expanded(
+                      child: buildLegendImage(
+                          context, Assets.carYellow, 'Selected')),
                 ],
               ),
             ),
           ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  child: const Text('Auto Select'),
-                  onPressed: handleAutoSelect,
-                ),
-              ),
-              Expanded(child: Container()),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  child: Row(
-                    children: const [
-                      Text('Next'),
-                      Icon(Icons.arrow_forward),
-                    ],
+          Visibility(
+            visible: !widget.viewOnly,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: const Text('Auto Select'),
+                    onPressed: handleAutoSelect,
                   ),
-                  onPressed: handleForward,
                 ),
-              ),
-            ],
+                Expanded(child: Container()),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: Row(
+                      children: const [
+                        Text('Submit'),
+                        Icon(Icons.arrow_forward),
+                      ],
+                    ),
+                    onPressed: handleForward,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -185,7 +244,7 @@ class _BookSlotState extends State<BookSlot> {
 
     int nxtCol = 0;
     try {
-      nxtCol = int.parse(widget.map[row][col - 1]);
+      nxtCol = int.parse(pMap[row][col - 1]);
     } catch (_) {}
 
     double transformation = row == 0
@@ -202,14 +261,16 @@ class _BookSlotState extends State<BookSlot> {
         ),
       ),
       child: InkWell(
-        onTap: () {
-          if (value == 1) {
-            setState(() {
-              selectedIndex = row * widget.map[0].length + col;
-              slotNumber = '${alphabets[col]}$row';
-            });
-          }
-        },
+        onTap: widget.viewOnly
+            ? null
+            : () {
+                if (value == 1) {
+                  setState(() {
+                    selectedIndex = row * pMap[0].length + col;
+                    slotNumber = '${alphabets[col]}$row';
+                  });
+                }
+              },
         child: Center(
           child: Transform.rotate(
             angle: transformation,

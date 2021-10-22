@@ -78,7 +78,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 height: 24.0,
               ),
               const Text(
-                'Join hands to save the\nEnvironment',
+                'Your car, service for you,\nchoice from you.',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,

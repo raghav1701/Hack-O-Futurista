@@ -2,6 +2,7 @@ library widgets;
 
 export 'btn_social.dart';
 export 'dialog.dart';
+export 'form_field.dart';
 export 'interactive_text.dart';
 export 'progress_dialog.dart';
 export 'switch.dart';

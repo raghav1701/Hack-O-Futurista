@@ -2,7 +2,6 @@ import 'package:bugbusters/application.dart';
 import 'package:flutter/material.dart';
 
 import 'components/btn.dart';
-import 'components/form_field.dart';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({Key? key}) : super(key: key);
@@ -35,9 +34,15 @@ class _SigninScreenState extends State<SigninScreen> {
       },
       onFinish: (user, claims) async {
         await progressDialog.hide();
-        await sharedPreferences.saveAccessLevel(claims?['accessLevel'] as int);
-        Navigator.of(context)
+        int level = claims?['accessLevel'] as int;
+        await sharedPreferences.saveAccessLevel(level);
+        if (level == 1) {
+          Navigator.of(context)
             .pushNamedAndRemoveUntil(Routes.dashboard, (route) => false);
+        } else {
+          Navigator.of(context)
+            .pushNamedAndRemoveUntil(Routes.mdashboard, (route) => false);
+        }
       },
       onError: (code, message) async {
         if (mounted) {

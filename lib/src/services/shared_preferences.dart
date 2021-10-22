@@ -16,7 +16,7 @@ class SharedPreferencesProvider {
     await _prefs?.setInt(_accessLevel, value);
   }
 
-  String? get accessLevel => _prefs?.getString(_accessLevel);
+  int? get accessLevel => _prefs?.getInt(_accessLevel);
 }
 
 late SharedPreferencesProvider sharedPreferences;

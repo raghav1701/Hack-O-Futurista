@@ -52,6 +52,10 @@ ThemeData lightTheme = ThemeData.light().copyWith(
     color: Colors.grey.shade600,
   ),
 
+  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+    backgroundColor: Color(0xFF0B4AAA),
+  ),
+
   inputDecorationTheme: const InputDecorationTheme(
     border: OutlineInputBorder(
       borderSide: BorderSide.none,
