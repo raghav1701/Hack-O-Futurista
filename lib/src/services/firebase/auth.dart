@@ -63,6 +63,7 @@ class FirebaseAuthService {
         user = await _firebaseAuth
             .createUserWithEmailAndPassword(email: email, password: password)
             .timeout(const Duration(seconds: 20));
+        user.user?.updateDisplayName(additional?['name'] as String);
       }
       if (user.user != null) {
         await onFinish(user.user, await getCustomClaims());

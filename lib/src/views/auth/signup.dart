@@ -62,7 +62,7 @@ class _SignupScreenState extends State<SignupScreen> {
         }
       },
     );
-    await service.createUser(email: email!, password: password!);
+    await service.createUser(email: email!, password: password!, additional: {'name': name!});
   }
 
   void handleButton() {
